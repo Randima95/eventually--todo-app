@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create account | eventually!</title>
+    <link rel="stylesheet" th:href="@{/style.css}">
+</head>
+<body class="auth-page">
+<main class="auth-shell">
+    <section class="auth-brand">
+        <p class="eyebrow">START SMALL. FINISH MORE.</p>
+        <h1>eventually<span>!</span></h1>
+        <p>Your private list for the tasks that deserve to get done.</p>
+    </section>
+
+    <section class="auth-card">
+        <p class="eyebrow">CREATE ACCOUNT</p>
+        <h2>Start organizing today</h2>
+
+        <div th:if="${registrationError}" class="alert error" th:text="${registrationError}"></div>
+
+        <form th:action="@{/register}" th:object="${registrationRequest}" method="post" class="auth-form">
+            <label>
+                Username
+                <input th:field="*{username}" type="text" minlength="3" maxlength="40" required autofocus>
+                <small class="field-error" th:errors="*{username}"></small>
+            </label>
+
+            <label>
+                Password
+                <input th:field="*{password}" type="password" minlength="6" required>
+                <small class="field-error" th:errors="*{password}"></small>
+            </label>
+
+            <button class="primary-button full-width" type="submit">Create account</button>
+        </form>
+
+        <p class="auth-footer">
+            Already have an account? <a th:href="@{/login}">Sign in</a>
+        </p>
+    </section>
+</main>
+</body>
+</html>

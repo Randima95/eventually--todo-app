@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard | eventually!</title>
+    <link rel="stylesheet" th:href="@{/style.css}">
+</head>
+<body>
+<main class="app-shell">
+    <header class="topbar">
+        <a class="brand" th:href="@{/}">eventually<span>!</span></a>
+
+        <div class="topbar-actions">
+            <span class="welcome">Hi, <strong th:text="${username}">user</strong></span>
+            <form th:action="@{/logout}" method="post">
+                <button class="text-button" type="submit">Sign out</button>
+            </form>
+        </div>
+    </header>
+
+    <section class="hero">
+        <div>
+            <p class="eyebrow">YOUR FOCUS DASHBOARD</p>
+            <h1>Make progress,<br><em>eventually.</em></h1>
+            <p class="subtitle">A calm place to plan your work and celebrate completion.</p>
+        </div>
+
+        <div class="progress-card">
+            <div class="progress-header">
+                <span>Progress</span>
+                <strong th:text="${completedTasks + ' / ' + totalTasks}">0 / 0</strong>
+            </div>
+
+            <div class="progress-track">
+                <div class="progress-fill"
+                     th:style="${totalTasks == 0} ? 'width: 0%' : 'width: ' + (${completedTasks * 100 / totalTasks}) + '%'">
+                </div>
+            </div>
+
+            <p th:text="${totalTasks == 0} ? 'Add your first task to begin.' : completedTasks + ' task(s) completed.'">
+                Add your first task to begin.
+            </p>
+        </div>
+    </section>
+
+    <div th:if="${successMessage}" class="alert success" th:text="${successMessage}"></div>
+    <div th:if="${errorMessage}" class="alert error" th:text="${errorMessage}"></div>
+
+    <section th:if="${!#lists.isEmpty(reminders)}" class="reminder-banner">
+        <div class="reminder-icon">⏰</div>
+        <div>
+            <strong>You have upcoming reminders</strong>
+            <p th:text="${#lists.size(reminders)} + ' task(s) have a reminder due within the next day.'">
+                You have reminders.
+            </p>
+        </div>
+    </section>
+
+    <section class="card add-task-card">
+        <div class="section-heading">
+            <div>
+                <p class="eyebrow">NEW TASK</p>
+                <h2>Add something meaningful</h2>
+            </div>
+        </div>
+
+        <form class="task-form" th:action="@{/tasks}" method="post">
+            <label class="description-field">
+                Task description
+                <input type="text" name="description"
+                       placeholder="e.g., Review OOSE homework requirements"
+                       required maxlength="255">
+            </label>
+
+            <label>
+                Deadline
+                <input type="date" name="deadline" required th:attr="min=${today}">
+            </label>
+
+            <label>
+                Reminder <span class="optional">(optional)</span>
+                <input type="datetime-local" name="reminderAt">
+            </label>
+
+            <button class="primary-button" type="submit">+ Add task</button>
+        </form>
+    </section>
+
+    <section class="card">
+        <div class="toolbar">
+            <div>
+                <p class="eyebrow">TASKS</p>
+                <h2>Your list</h2>
+            </div>
+
+            <form class="search-form" th:action="@{/}" method="get">
+                <input type="hidden" name="status" th:value="${status}">
+                <input type="hidden" name="sort" th:value="${sort}">
+                <input type="search" name="keyword" th:value="${keyword}" placeholder="Search tasks">
+                <button type="submit">Search</button>
+            </form>
+        </div>
+
+        <div class="control-row">
+            <nav class="filter-bar" aria-label="Task status filters">
+                <a th:href="@{/(status='all', sort=${sort}, keyword=${keyword})}"
+                   th:classappend="${status == 'all'} ? ' active' : ''">All</a>
+                <a th:href="@{/(status='pending', sort=${sort}, keyword=${keyword})}"
+                   th:classappend="${status == 'pending'} ? ' active' : ''">Pending</a>
+                <a th:href="@{/(status='completed', sort=${sort}, keyword=${keyword})}"
+                   th:classappend="${status == 'completed'} ? ' active' : ''">Completed</a>
+                <a th:href="@{/(status='overdue', sort=${sort}, keyword=${keyword})}"
+                   th:classappend="${status == 'overdue'} ? ' active' : ''">Overdue</a>
+            </nav>
+
+            <form class="sort-form" th:action="@{/}" method="get">
+                <input type="hidden" name="keyword" th:value="${keyword}">
+                <input type="hidden" name="status" th:value="${status}">
+                <label>
+                    Sort
+                    <select name="sort" onchange="this.form.submit()">
+                        <option value="deadlineAsc" th:selected="${sort == 'deadlineAsc'}">Nearest deadline</option>
+                        <option value="deadlineDesc" th:selected="${sort == 'deadlineDesc'}">Latest deadline</option>
+                        <option value="newest" th:selected="${sort == 'newest'}">Newest created</option>
+                    </select>
+                </label>
+            </form>
+        </div>
+
+        <div th:if="${#lists.isEmpty(tasks)}" class="empty-state">
+            <div class="empty-icon">✓</div>
+            <h3>No tasks found</h3>
+            <p>Add a new task or adjust your search and filters.</p>
+        </div>
+
+        <div th:unless="${#lists.isEmpty(tasks)}" class="task-list">
+            <article class="task-row"
+                     th:each="task : ${tasks}"
+                     th:classappend="${task.completed} ? ' completed-row' : ''">
+
+                <div class="task-status-icon" th:text="${task.completed} ? '✓' : '•'">•</div>
+
+                <div class="task-details">
+                    <h3 th:text="${task.description}">Task description</h3>
+                    <p>
+                        Due <time th:text="${#temporals.format(task.deadline, 'MMM d, yyyy')}">Sep 14, 2026</time>
+                        <span th:if="${task.overdue}" class="overdue">Overdue</span>
+                        <span th:if="${task.dueToday}" class="today">Due today</span>
+                    </p>
+                    <p class="reminder-text" th:if="${task.reminderAt != null}">
+                        Reminder:
+                        <span th:text="${#temporals.format(task.reminderAt, 'MMM d, h:mm a')}">
+                            Sep 14, 9:00 AM
+                        </span>
+                    </p>
+                </div>
+
+                <span class="status-badge"
+                      th:classappend="${task.completed} ? ' completed' : ' pending'"
+                      th:text="${task.completed} ? 'Completed' : 'Pending'">
+                    Pending
+                </span>
+
+                <div class="task-actions">
+                    <form th:if="${!task.completed}"
+                          th:action="@{/tasks/{id}/complete(id=${task.id})}"
+                          method="post">
+                        <button class="complete-button" type="submit">Complete</button>
+                    </form>
+
+                    <details class="edit-details">
+                        <summary>Edit</summary>
+                        <form class="edit-form"
+                              th:action="@{/tasks/{id}/edit(id=${task.id})}"
+                              method="post">
+                            <label>
+                                Description
+                                <input type="text" name="description"
+                                       th:value="${task.description}"
+                                       required maxlength="255">
+                            </label>
+
+                            <label>
+                                Deadline
+                                <input type="date" name="deadline"
+                                       th:value="${task.deadline}"
+                                       required th:attr="min=${today}">
+                            </label>
+
+                            <label>
+                                Reminder
+                                <input type="datetime-local" name="reminderAt"
+                                       th:value="${task.reminderAt != null ? #temporals.format(task.reminderAt, 'yyyy-MM-dd''T''HH:mm') : ''}">
+                            </label>
+
+                            <button type="submit">Save changes</button>
+                        </form>
+                    </details>
+
+                    <form th:action="@{/tasks/{id}/delete(id=${task.id})}"
+                          method="post"
+                          onsubmit="return confirm('Delete this task permanently?');">
+                        <button class="delete-button" type="submit">Delete</button>
+                    </form>
+                </div>
+            </article>
+        </div>
+    </section>
+</main>
+
+<script th:src="@{/app.js}"></script>
+</body>
+</html>
