@@ -25,15 +25,15 @@ A local web-based todo application that helps users plan tasks, track deadlines,
 
 ## Tech Stack
 
-- **Java 21** — programming language and runtime
-- **Spring Boot** — application framework and embedded server
-- **Spring MVC** — web request handling and controller layer
-- **Spring Security** — user registration, login, logout, password protection, and authorization
-- **Spring Data JPA / Hibernate** — object-relational mapping and data persistence
-- **H2 Database** — file-based relational database for local persistent storage
-- **Thymeleaf** — server-side HTML template engine
-- **HTML/CSS** — user interface and styling
-- **Maven** — dependency management and build tool
+- **Java 21** - programming language and runtime
+- **Spring Boot** - application framework and embedded server
+- **Spring MVC** - web request handling and controller layer
+- **Spring Security** - user registration, login, logout, password protection, and authorization
+- **Spring Data JPA / Hibernate** - object-relational mapping and data persistence
+- **H2 Database** - file-based relational database for local persistent storage
+- **Thymeleaf** - server-side HTML template engine
+- **HTML/CSS** - user interface and styling
+- **Maven** - dependency management and build tool
 
 ## Architecture
 
